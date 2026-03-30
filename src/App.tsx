@@ -21,6 +21,7 @@ const App: React.FC = () => {
   
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchCategory, setSearchCategory] = useState<string>('all');
   const [searchSortBy, setSearchSortBy] = useState<SortOption>('newest');
 
   // PWA Install State
@@ -54,8 +55,14 @@ const App: React.FC = () => {
   };
 
   // Simple Router
-  const navigateTo = (view: ViewState) => {
+  const navigateTo = (view: ViewState, category?: string) => {
     setCurrentView(view);
+    if (category) {
+      setSearchCategory(category);
+    } else if (view !== 'SEARCH') {
+      // Reset search category when leaving search unless explicitly set
+      // Actually, maybe keep it. Let's just set it if provided.
+    }
     window.scrollTo(0, 0);
   };
 
@@ -82,11 +89,15 @@ const App: React.FC = () => {
   };
 
   const getSearchResults = () => {
-    return MOCK_WIGS.filter(w => 
-      w.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      w.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      w.color.toLowerCase().includes(searchQuery.toLowerCase())
-    ).sort((a, b) => {
+    return MOCK_WIGS.filter(w => {
+      const matchesQuery = w.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        w.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        w.color.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesCategory = searchCategory === 'all' || w.length.toLowerCase() === searchCategory.toLowerCase();
+      
+      return matchesQuery && matchesCategory;
+    }).sort((a, b) => {
       if (searchSortBy === 'price_low') return a.price - b.price;
       if (searchSortBy === 'price_high') return b.price - a.price;
       return b.createdAt - a.createdAt;
@@ -96,13 +107,25 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (currentView) {
       case 'HOME':
-        return <Home onProductClick={handleProductClick} onInstallApp={handleInstallClick} canInstall={!!deferredPrompt} />;
+        return <Home onProductClick={handleProductClick} onInstallApp={handleInstallClick} canInstall={!!deferredPrompt} onChangeView={navigateTo} />;
       case 'SEARCH':
         const searchResults = getSearchResults();
         return (
             <div className="pt-8 px-6 max-w-6xl mx-auto w-full min-h-screen">
                 <div className="flex justify-between items-center mb-6">
                   <h1 className="text-2xl font-display font-bold">Search</h1>
+                  <div className="flex items-center space-x-2">
+                    <select 
+                      value={searchCategory}
+                      onChange={(e) => setSearchCategory(e.target.value)}
+                      className="text-sm border border-gray-200 rounded-lg px-2 py-1 bg-white"
+                    >
+                      <option value="all">All Lengths</option>
+                      <option value="short">Short</option>
+                      <option value="medium">Medium</option>
+                      <option value="long">Long</option>
+                    </select>
+                  </div>
                 </div>
                 
                 <div className="relative mb-6">

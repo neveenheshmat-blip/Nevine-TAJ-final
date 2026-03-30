@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Wig } from '../types';
 import { storeService } from '../services/integration';
-import { Filter, ChevronLeft, ChevronRight, ArrowUpDown, Download, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowUpDown, X } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { Logo } from '../components/Logo';
 
@@ -10,16 +10,16 @@ interface HomeProps {
   onProductClick: (wig: Wig) => void;
   onInstallApp?: () => void;
   canInstall?: boolean;
+  onChangeView?: (view: any, category?: string) => void;
 }
 
-type LengthCategory = 'all' | 'short' | 'medium' | 'long';
 type SortOption = 'newest' | 'price_low' | 'price_high';
 
-export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canInstall }) => {
-  const [activeCategory, setActiveCategory] = useState<LengthCategory>('all');
+export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canInstall, onChangeView }) => {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [wigs, setWigs] = useState<Wig[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(true);
 
@@ -37,27 +37,40 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
     loadProducts();
   }, []);
 
-  const filteredWigs = wigs.filter(wig => {
-    if (activeCategory === 'all') return true;
-    if (activeCategory === 'short') return wig.length === 'Short';
-    if (activeCategory === 'medium') return wig.length === 'Medium Length';
-    if (activeCategory === 'long') return wig.length === 'Long';
-    return true;
-  }).sort((a, b) => {
+  const filteredWigs = [...wigs].sort((a, b) => {
     if (sortBy === 'price_low') return a.price - b.price;
     if (sortBy === 'price_high') return b.price - a.price;
     return b.createdAt - a.createdAt; // newest by default
   });
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (scrollRef.current) {
+        const { current } = scrollRef;
+        const slideWidth = current.clientWidth * 0.9; // Match slide width
+        const totalSlides = 4;
+        const nextSlide = (currentSlide + 1) % totalSlides;
+        
+        current.scrollTo({ left: nextSlide * (slideWidth + 16), behavior: 'smooth' }); // 16 is space-x-4
+        setCurrentSlide(nextSlide);
+      }
+    }, 4000); // Auto-scroll every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [currentSlide]);
+
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const { current } = scrollRef;
-      const scrollAmount = current.clientWidth * 0.8;
-      if (direction === 'left') {
-        current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-      } else {
-        current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-      }
+      const slideWidth = current.clientWidth * 0.9;
+      const totalSlides = 4;
+      let nextSlide = direction === 'left' ? currentSlide - 1 : currentSlide + 1;
+      
+      if (nextSlide < 0) nextSlide = totalSlides - 1;
+      if (nextSlide >= totalSlides) nextSlide = 0;
+
+      current.scrollTo({ left: nextSlide * (slideWidth + 16), behavior: 'smooth' });
+      setCurrentSlide(nextSlide);
     }
   };
 
@@ -88,8 +101,7 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
         </h1>
       </header>
 
-      {/* Promotions Slider */}
-      <div className="py-6 relative group bg-white">
+           <div className="py-6 relative group bg-white">
          <div className="px-6 flex justify-between items-center mb-4">
            <div className="flex space-x-2">
              <button onClick={() => scroll('left')} className="p-1.5 rounded-full border border-gray-200 hover:bg-gray-50 text-secondary-600 transition-colors">
@@ -106,55 +118,92 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
          
          <div ref={scrollRef} className="flex space-x-4 overflow-x-auto px-6 no-scrollbar snap-x scroll-smooth pb-4">
             
-            {/* Slide 1: Occasion/Wedding - UPDATED IMAGE */}
-            <div className="snap-center shrink-0 w-[90%] md:w-[45%] lg:w-[30%] relative rounded-2xl overflow-hidden aspect-[21/9] shadow-md hover:shadow-lg transition-shadow cursor-pointer group">
+            {/* Slide 1: Occasion/Buying */}
+            <div 
+              onClick={() => onChangeView?.('SEARCH')}
+              className="snap-center shrink-0 w-[90%] md:w-[45%] lg:w-[30%] relative rounded-2xl overflow-hidden aspect-[21/9] shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
+            >
               <img 
-                src="/wigs-store.jpg" 
-                onError={(e) => {
-                  e.currentTarget.src = "https://images.unsplash.com/photo-1522337660859-02fbefca4702?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
-                  e.currentTarget.onerror = null;
-                }}
-                alt="Wig Shop" 
+                src="/IMG_3586.webp" 
+                alt="Occasion wig" 
                 className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" 
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+                }}
               />
-              <div className="absolute inset-0 bg-black/40 p-6 flex flex-col justify-center items-end text-right">
-                <span className="bg-primary-500 text-white text-[10px] font-bold px-2 py-1 rounded w-fit mb-2 self-end">GLOW UP</span>
-                <p className="text-white font-bold text-xl md:text-2xl leading-tight" dir="rtl">
+              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent p-6 flex flex-col justify-center items-start text-left">
+                <span className="bg-primary-500 text-white text-[10px] font-bold px-2 py-1 rounded w-fit mb-2 shadow-sm">SPECIAL OCCASION</span>
+                <p className="text-white font-bold text-xl md:text-2xl leading-tight drop-shadow-md" dir="rtl">
                   عندك فرح او مناسبه و نفسك تشترى باروكة؟
                 </p>
+                <div className="mt-3 flex items-center text-white text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30 group-hover:bg-white/40 transition-all">
+                  تصفحي الآن <ChevronRight size={14} className="ml-1" />
+                </div>
               </div>
             </div>
 
-            {/* Slide 2: Damaged Hair/Rest */}
-            <div className="snap-center shrink-0 w-[90%] md:w-[45%] lg:w-[30%] relative rounded-2xl overflow-hidden aspect-[21/9] shadow-md hover:shadow-lg transition-shadow cursor-pointer group">
-              <img src="https://images.unsplash.com/photo-1562004760-aceed7bb0fe3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Hair Care" className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-black/40 p-6 flex flex-col justify-center items-end text-right">
-                <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded w-fit mb-2 self-end">PROTECT</span>
-                <p className="text-white font-bold text-xl md:text-2xl leading-tight" dir="rtl">
+            {/* Slide 2: Hair Health */}
+            <div 
+              onClick={() => onChangeView?.('SEARCH')}
+              className="snap-center shrink-0 w-[90%] md:w-[45%] lg:w-[30%] relative rounded-2xl overflow-hidden aspect-[21/9] shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="Healthy hair" 
+                className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-l from-black/70 via-black/30 to-transparent p-6 flex flex-col justify-center items-end text-right">
+                <span className="bg-secondary-500 text-white text-[10px] font-bold px-2 py-1 rounded w-fit mb-2 shadow-sm">HAIR CARE</span>
+                <p className="text-white font-bold text-xl md:text-2xl leading-tight drop-shadow-md" dir="rtl">
                   شعرك هلك من الصبغه و الحراره و نفسك تريحيه ؟
                 </p>
+                <div className="mt-3 flex items-center text-white text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30 group-hover:bg-white/40 transition-all">
+                  اكتشفي الحل <ChevronLeft size={14} className="mr-1" />
+                </div>
               </div>
             </div>
 
-            {/* Slide 3: Quality & Trial */}
-            <div className="snap-center shrink-0 w-[90%] md:w-[45%] lg:w-[30%] relative rounded-2xl overflow-hidden aspect-[21/9] shadow-md hover:shadow-lg transition-shadow cursor-pointer group">
-              <img src="https://images.unsplash.com/photo-1595476104010-b44560a5d784?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Quality Wig" className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-black/50 p-6 flex flex-col justify-center items-center text-center">
-                <span className="bg-yellow-400 text-black text-[10px] font-bold px-2 py-1 rounded w-fit mb-2">PREMIUM</span>
-                <p className="text-white font-display font-bold text-2xl uppercase">Only Human Hair</p>
-                <p className="text-white/90 text-sm mt-1 font-medium">Try before you buy</p>
+            {/* Slide 3: Quality & Look */}
+            <div 
+              onClick={() => onChangeView?.('SEARCH')}
+              className="snap-center shrink-0 w-[90%] md:w-[45%] lg:w-[30%] relative rounded-2xl overflow-hidden aspect-[21/9] shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1560829141-9988019e917d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="Human hair quality" 
+                className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent p-6 flex flex-col justify-center items-start text-left">
+                <span className="bg-primary-500 text-white text-[10px] font-bold px-2 py-1 rounded w-fit mb-2 shadow-sm">PREMIUM QUALITY</span>
+                <p className="text-white font-bold text-lg md:text-xl leading-tight drop-shadow-md">
+                  Only human hair<br/>
+                  Try before you buy<br/>
+                  Get that curly beach look
+                </p>
+                <div className="mt-3 flex items-center text-white text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30 group-hover:bg-white/40 transition-all">
+                  Shop Now <ChevronRight size={14} className="ml-1" />
+                </div>
               </div>
             </div>
 
-            {/* Slide 4: Selling / Curly Look */}
-            <div className="snap-center shrink-0 w-[90%] md:w-[45%] lg:w-[30%] relative rounded-2xl overflow-hidden aspect-[21/9] shadow-md hover:shadow-lg transition-shadow cursor-pointer group">
-              <img src="https://images.unsplash.com/photo-1605497788044-5a90406410d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Curly Hair" className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-l from-black/70 to-transparent p-6 flex flex-col justify-center items-end text-right">
-                <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded w-fit mb-2 self-end">SELL IT</span>
-                <p className="text-white font-bold text-xl leading-tight" dir="rtl">
+            {/* Slide 4: Selling */}
+            <div 
+              onClick={() => onChangeView?.('SELL')}
+              className="snap-center shrink-0 w-[90%] md:w-[45%] lg:w-[30%] relative rounded-2xl overflow-hidden aspect-[21/9] shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="Sell your wig" 
+                className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-l from-black/70 via-black/30 to-transparent p-6 flex flex-col justify-center items-end text-right">
+                <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded w-fit mb-2 shadow-sm">CASH FOR YOUR WIG</span>
+                <p className="text-white font-bold text-xl md:text-2xl leading-tight drop-shadow-md" dir="rtl">
                   بيعى باروكتك لو مش لايقه عليكى
                 </p>
-                <p className="text-white/80 text-xs mt-1">Get that curly beach look instead!</p>
+                <div className="mt-3 flex items-center text-white text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30 group-hover:bg-white/40 transition-all">
+                  ابدئي البيع <ChevronLeft size={14} className="mr-1" />
+                </div>
               </div>
             </div>
 
@@ -163,12 +212,13 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
 
       {/* 3 Big Clickable Photos - WOMEN HAIR ONLY */}
       <div className="px-6 py-4 space-y-6 md:space-y-0 md:grid md:grid-cols-3 md:gap-6">
+
         {/* Short */}
         <button 
-          onClick={() => setActiveCategory('short')}
-          className={`relative w-full h-48 md:h-64 rounded-2xl overflow-hidden group shadow-lg transition-all transform ${activeCategory === 'short' ? 'ring-4 ring-primary-300 scale-[1.02]' : 'hover:scale-[1.02]'}`}
+          onClick={() => onChangeView?.('SEARCH', 'short')}
+          className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden group shadow-lg transition-all transform hover:scale-[1.02]"
         >
-          <img src="https://images.unsplash.com/photo-1521119989659-a83eee488058?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Short Wig" />
+          <img src="https://images.unsplash.com/photo-1516914915600-89f7ddec1c1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Short Wig" />
           <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex flex-col items-center justify-center p-4">
              <h3 className="text-white font-display font-bold text-3xl tracking-wide drop-shadow-md">Short Wigs</h3>
              <span className="text-white/90 text-sm font-medium mt-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
@@ -179,10 +229,10 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
 
         {/* Medium */}
         <button 
-          onClick={() => setActiveCategory('medium')}
-          className={`relative w-full h-48 md:h-64 rounded-2xl overflow-hidden group shadow-lg transition-all transform ${activeCategory === 'medium' ? 'ring-4 ring-primary-300 scale-[1.02]' : 'hover:scale-[1.02]'}`}
+          onClick={() => onChangeView?.('SEARCH', 'medium')}
+          className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden group shadow-lg transition-all transform hover:scale-[1.02]"
         >
-          <img src="https://images.unsplash.com/photo-1605497788044-5a90406410d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Medium Wig" />
+          <img src="https://images.unsplash.com/photo-1584297141812-0199b7a38f85?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Medium Wig" />
           <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex flex-col items-center justify-center p-4">
              <h3 className="text-white font-display font-bold text-3xl tracking-wide drop-shadow-md">Medium Length</h3>
              <span className="text-white/90 text-sm font-medium mt-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
@@ -193,10 +243,10 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
 
         {/* Long */}
         <button 
-          onClick={() => setActiveCategory('long')}
-          className={`relative w-full h-48 md:h-64 rounded-2xl overflow-hidden group shadow-lg transition-all transform ${activeCategory === 'long' ? 'ring-4 ring-primary-300 scale-[1.02]' : 'hover:scale-[1.02]'}`}
+          onClick={() => onChangeView?.('SEARCH', 'long')}
+          className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden group shadow-lg transition-all transform hover:scale-[1.02]"
         >
-          <img src="https://images.unsplash.com/photo-1562004760-aceed7bb0fe3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Long Wig" />
+          <img src="https://images.unsplash.com/photo-1519699047748-de8e457a634e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Long Wig" />
           <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex flex-col items-center justify-center p-4">
              <h3 className="text-white font-display font-bold text-3xl tracking-wide drop-shadow-md">Long Wigs</h3>
              <span className="text-white/90 text-sm font-medium mt-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
@@ -206,22 +256,11 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
         </button>
       </div>
 
-      {activeCategory !== 'all' && (
-        <div className="px-6 flex justify-center pb-2">
-          <button 
-            onClick={() => setActiveCategory('all')} 
-            className="flex items-center px-4 py-2 bg-secondary-900 text-white rounded-full text-sm font-medium hover:bg-secondary-800 transition-colors shadow-md"
-          >
-            <Filter size={14} className="mr-2" /> View All Styles
-          </button>
-        </div>
-      )}
-
       {/* Product Grid */}
       <div className="px-6 py-6 bg-gray-50 md:bg-white rounded-t-3xl md:rounded-none mt-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
           <h2 className="font-display font-bold text-secondary-900 text-xl mb-2 md:mb-0">
-            {activeCategory === 'all' ? 'Latest Collections' : `${activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} Collection`}
+            Latest Collections
           </h2>
           
           <div className="flex items-center space-x-2 self-end md:self-auto">
@@ -266,10 +305,7 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
                💇‍♀️
             </div>
             <p className="text-secondary-900 font-bold text-lg">No styles found</p>
-            <p className="text-secondary-500 text-sm mt-1 mb-4">We couldn't find any {activeCategory} wigs right now.</p>
-            <button onClick={() => setActiveCategory('all')} className="text-sm text-primary-600 font-bold hover:underline">
-              Clear Filters
-            </button>
+            <p className="text-secondary-500 text-sm mt-1 mb-4">We couldn't find any wigs right now. Please check back later!</p>
           </div>
         )}
       </div>
