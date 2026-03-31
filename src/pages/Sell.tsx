@@ -99,9 +99,14 @@ export const Sell: React.FC<SellProps> = ({ onSuccess }) => {
             <div className="space-y-4">
               <div className="flex justify-between items-end">
                 <label className="block text-sm font-bold text-secondary-900">Add Photos</label>
-                <span className={`text-[10px] font-bold uppercase tracking-wider ${formData.images.length < 3 ? 'text-red-500' : 'text-green-500'}`}>
-                  {formData.images.length}/3 Minimum
-                </span>
+                <div className="flex flex-col items-end">
+                  <span className={`text-[10px] font-bold uppercase tracking-wider ${formData.images.length < 3 ? 'text-red-500 animate-pulse' : 'text-green-500'}`}>
+                    {formData.images.length}/3 Minimum
+                  </span>
+                  {formData.images.length < 3 && (
+                    <span className="text-[8px] text-red-400 uppercase font-bold">Please add at least 3 photos to continue</span>
+                  )}
+                </div>
               </div>
               
               <div className="grid grid-cols-3 gap-3">
@@ -143,7 +148,7 @@ export const Sell: React.FC<SellProps> = ({ onSuccess }) => {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 p-4 bg-primary-50/30 rounded-2xl border border-primary-100">
               <div className="space-y-2">
                 <label className="flex items-center space-x-2 text-sm font-bold text-secondary-900">
                   <Ruler size={14} className="text-primary-500" />
@@ -152,7 +157,7 @@ export const Sell: React.FC<SellProps> = ({ onSuccess }) => {
                 <select 
                   value={formData.length}
                   onChange={e => setFormData({ ...formData, length: e.target.value as WigLength })}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-primary-500 transition-all"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-primary-500 transition-all shadow-sm"
                 >
                   <option value="Short">Short</option>
                   <option value="Medium Length">Medium Length</option>
@@ -167,7 +172,7 @@ export const Sell: React.FC<SellProps> = ({ onSuccess }) => {
                 <select 
                   value={formData.condition}
                   onChange={e => setFormData({ ...formData, condition: e.target.value as WigCondition })}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-primary-500 transition-all"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-primary-500 transition-all shadow-sm"
                 >
                   <option value={WigCondition.LIKE_NEW}>Like New</option>
                   <option value={WigCondition.GOOD}>Good</option>
