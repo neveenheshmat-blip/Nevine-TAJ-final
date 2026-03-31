@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Wig, SiteSettings } from '../types';
 import { storeService } from '../services/integration';
-import { ChevronLeft, ChevronRight, ArrowUpDown, X, Edit2, PlusCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowUpDown, X, Edit2 } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { Logo } from '../components/Logo';
 

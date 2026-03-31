@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "description": "Pre-owned wig marketplace with AI and Shopify integration",
-  "main": "index.tsx",
   "dependencies": {
     "@google/genai": "^1.31.0",
     "lucide-react": "^0.263.1",
@@ -15,7 +14,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "BUILD_PATH=dist react-scripts build",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -34,8 +33,8 @@
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "typescript": "^6.0.2"
   }
 }

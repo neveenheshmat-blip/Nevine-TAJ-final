@@ -1,3 +1,4 @@
+/* eslint-disable */
 
 export enum WigCondition {
   LIKE_NEW = 'Like New',

@@ -1,5 +1,5 @@
 
-import { Wig, WigCondition, WigType } from '../types';
+import { Wig } from '../types';
 import { MOCK_WIGS } from '../constants';
 
 class StoreService {
