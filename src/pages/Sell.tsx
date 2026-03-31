@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { WigCondition, WigType, WigLength, WigTexture } from '../types';
 import { storeService } from '../services/integration';
-import { Camera, Check, ArrowRight, X } from 'lucide-react';
+import { Camera, Check, ArrowRight, X, Ruler, Sparkles } from 'lucide-react';
 
 interface SellProps {
   onSuccess: () => void;
@@ -12,7 +12,6 @@ export const Sell: React.FC<SellProps> = ({ onSuccess }) => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
     description: '',
     price: '',
     type: WigType.FULL_WIG,
@@ -23,21 +22,37 @@ export const Sell: React.FC<SellProps> = ({ onSuccess }) => {
     images: [] as string[]
   });
 
-  const handleImageUpload = () => {
-    // Mock image upload
-    const mockImages = [
-      'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=800&q=80'
-    ];
-    setFormData({ ...formData, images: mockImages });
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, reader.result as string].slice(0, 10) // Limit to 10 photos
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
+      const generatedTitle = `${formData.condition} ${formData.length} ${formData.type}`;
       await storeService.addProduct({
         ...formData,
+        title: generatedTitle,
         price: Number(formData.price),
         sellerId: 'user_1' // Mock current user
       });
@@ -82,39 +97,83 @@ export const Sell: React.FC<SellProps> = ({ onSuccess }) => {
         {step === 1 ? (
           <div className="space-y-6 animate-slide-up">
             <div className="space-y-4">
-              <label className="block text-sm font-bold text-secondary-900">Add Photos</label>
-              <div 
-                onClick={handleImageUpload}
-                className="aspect-video bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-all group"
-              >
-                {formData.images.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-2 w-full h-full p-2">
-                    {formData.images.map((img, i) => (
-                      <img key={i} src={img} className="w-full h-full object-cover rounded-lg" alt="Upload preview" />
-                    ))}
+              <div className="flex justify-between items-end">
+                <label className="block text-sm font-bold text-secondary-900">Add Photos</label>
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${formData.images.length < 3 ? 'text-red-500' : 'text-green-500'}`}>
+                  {formData.images.length}/3 Minimum
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-3">
+                {formData.images.map((img, i) => (
+                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden group shadow-sm border border-gray-100">
+                    <img src={img} className="w-full h-full object-cover" alt="Upload preview" />
+                    <button 
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full backdrop-blur-sm hover:bg-red-500 transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
-                ) : (
-                  <>
-                    <div className="p-4 bg-white rounded-full text-secondary-400 group-hover:text-primary-500 shadow-sm transition-all">
-                      <Camera size={32} />
+                ))}
+                
+                {formData.images.length < 10 && (
+                  <label className="aspect-square bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-all group">
+                    <input 
+                      type="file" 
+                      multiple 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={handleImageUpload} 
+                    />
+                    <div className="p-2 bg-white rounded-full text-secondary-400 group-hover:text-primary-500 shadow-sm transition-all">
+                      <Camera size={20} />
                     </div>
-                    <p className="mt-4 text-sm font-medium text-secondary-400">Tap to upload photos</p>
-                    <p className="text-[10px] text-secondary-300 mt-1 uppercase tracking-widest">Up to 5 photos</p>
-                  </>
+                    <span className="mt-2 text-[10px] font-bold text-secondary-400 uppercase">Add</span>
+                  </label>
                 )}
               </div>
+              
+              {formData.images.length === 0 && (
+                <div className="py-8 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center">
+                  <p className="text-sm text-secondary-400">No photos added yet</p>
+                  <p className="text-[10px] text-secondary-300 mt-1 uppercase tracking-widest">Minimum 3 photos required</p>
+                </div>
+              )}
             </div>
 
-            <div className="space-y-2">
-              <label className="block text-sm font-bold text-secondary-900">Title</label>
-              <input 
-                type="text" 
-                required
-                value={formData.title}
-                onChange={e => setFormData({ ...formData, title: e.target.value })}
-                placeholder="e.g. Luxurious Body Wave - Human Hair"
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-primary-500 transition-all"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="flex items-center space-x-2 text-sm font-bold text-secondary-900">
+                  <Ruler size={14} className="text-primary-500" />
+                  <span>Length</span>
+                </label>
+                <select 
+                  value={formData.length}
+                  onChange={e => setFormData({ ...formData, length: e.target.value as WigLength })}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-primary-500 transition-all"
+                >
+                  <option value="Short">Short</option>
+                  <option value="Medium Length">Medium Length</option>
+                  <option value="Long">Long</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="flex items-center space-x-2 text-sm font-bold text-secondary-900">
+                  <Sparkles size={14} className="text-primary-500" />
+                  <span>Condition</span>
+                </label>
+                <select 
+                  value={formData.condition}
+                  onChange={e => setFormData({ ...formData, condition: e.target.value as WigCondition })}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-primary-500 transition-all"
+                >
+                  <option value={WigCondition.LIKE_NEW}>Like New</option>
+                  <option value={WigCondition.GOOD}>Good</option>
+                  <option value={WigCondition.FAIR}>Fair</option>
+                </select>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -131,7 +190,7 @@ export const Sell: React.FC<SellProps> = ({ onSuccess }) => {
             <button 
               type="button"
               onClick={() => setStep(2)}
-              disabled={!formData.title || !formData.description}
+              disabled={!formData.description || formData.images.length < 3}
               className="w-full bg-secondary-900 text-white py-4 rounded-2xl font-bold shadow-xl hover:bg-secondary-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               <span>Next Step</span>
@@ -162,33 +221,6 @@ export const Sell: React.FC<SellProps> = ({ onSuccess }) => {
                   <option value={WigType.FULL_WIG}>Full Wig</option>
                   <option value={WigType.HALF_WIG}>Half Wig</option>
                   <option value={WigType.EXTENSION}>Extension</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="block text-sm font-bold text-secondary-900">Length</label>
-                <select 
-                  value={formData.length}
-                  onChange={e => setFormData({ ...formData, length: e.target.value as WigLength })}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-primary-500 transition-all"
-                >
-                  <option value="Short">Short</option>
-                  <option value="Medium Length">Medium</option>
-                  <option value="Long">Long</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-bold text-secondary-900">Condition</label>
-                <select 
-                  value={formData.condition}
-                  onChange={e => setFormData({ ...formData, condition: e.target.value as WigCondition })}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-primary-500 transition-all"
-                >
-                  <option value={WigCondition.LIKE_NEW}>Like New</option>
-                  <option value={WigCondition.GOOD}>Good</option>
-                  <option value={WigCondition.FAIR}>Fair</option>
                 </select>
               </div>
             </div>

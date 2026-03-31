@@ -83,118 +83,253 @@ export const MOCK_WIGS: Wig[] = [
   {
     id: 'w1',
     sellerId: 'user_2',
-    title: 'Luxurious Body Wave - Virgin Human Hair',
-    description: 'Only worn once for a photoshoot. This unit is custom colored and styled. Very soft, minimal shedding.',
-    price: 3200,
-    originalPrice: 4500,
+    title: 'Luxurious HD Lace Frontal - 24" Body Wave',
+    description: 'Ultra-thin HD lace for a seamless melt. 100% Virgin Brazilian hair, high density (250%). Perfect for special occasions.',
+    price: 12500,
+    originalPrice: 15000,
     images: [
-      'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=800&q=80', 
-      'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=800&q=80'
+      'https://picsum.photos/seed/wig1/800/800', 
+      'https://picsum.photos/seed/wig1b/800/800'
     ],
     type: WigType.FULL_WIG,
     length: 'Long',
     condition: WigCondition.LIKE_NEW,
-    color: '1B/30 Ombre',
+    color: 'Natural Black',
     texture: 'Wavy',
-    likes: 24,
+    likes: 45,
     isSold: false,
     createdAt: Date.now() - 10000000
   },
   {
     id: 'w2',
     sellerId: 'user_3',
-    title: 'Cute Bob Cut - Human Hair',
-    description: 'Perfect for everyday wear! Natural hairline. The lace is already cut but the wig is in great condition.',
-    price: 1450,
-    originalPrice: 2000,
+    title: 'Premium Brazilian Silk Straight - 18"',
+    description: 'Silky smooth texture that stays straight all day. Pre-plucked hairline and bleached knots for a natural look.',
+    price: 9800,
+    originalPrice: 11000,
     images: [
-      'https://images.unsplash.com/photo-1595476104010-b44560a5d784?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1605497788044-5a90406410d2?auto=format&fit=crop&w=800&q=80'
+      'https://picsum.photos/seed/wig2/800/800',
+      'https://picsum.photos/seed/wig2b/800/800'
     ],
     type: WigType.FULL_WIG,
-    length: 'Short',
-    condition: WigCondition.GOOD,
+    length: 'Medium Length',
+    condition: WigCondition.LIKE_NEW,
     color: 'Jet Black',
     texture: 'Straight',
-    likes: 15,
+    likes: 32,
     isSold: false,
     createdAt: Date.now() - 5000000
   },
   {
     id: 'w3',
     sellerId: 'user_4',
-    title: 'Blonde 613 Straight',
-    description: 'Brand new style! Ready to be dyed or worn as is. High density.',
-    price: 2800,
+    title: 'Elite European Bob Cut - 12"',
+    description: 'Chic and sophisticated bob cut. European human hair for a fine, natural feel. Glueless cap for easy wear.',
+    price: 8500,
+    originalPrice: 9500,
     images: [
-      'https://images.unsplash.com/photo-1560829141-9988019e917d?auto=format&fit=crop&w=800&q=80', 
-      'https://images.unsplash.com/photo-1584297117396-93260716348e?auto=format&fit=crop&w=800&q=80'
+      'https://picsum.photos/seed/wig3/800/800', 
+      'https://picsum.photos/seed/wig3b/800/800'
     ],
     type: WigType.FULL_WIG,
-    length: 'Long',
+    length: 'Short',
     condition: WigCondition.LIKE_NEW,
-    color: '613 Blonde',
+    color: 'Dark Chocolate',
     texture: 'Straight',
-    likes: 102,
+    likes: 128,
     isSold: false,
     createdAt: Date.now() - 200000
   },
   {
     id: 'w4',
     sellerId: 'user_5',
-    title: 'Kinky Curly Afro Wig',
-    description: 'Big hair don\'t care! This unit is full and bouncy. Great for protective styling.',
-    price: 800,
+    title: 'Royal Curly Deep Wave - 22"',
+    description: 'Deep, defined curls that bounce beautifully. Minimal shedding and tangling. Can be styled wet for a sleek look.',
+    price: 11200,
     images: [
-      'https://images.unsplash.com/photo-1522337360705-8754d8722b39?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1535223289827-42f1e9919769?auto=format&fit=crop&w=800&q=80'
+      'https://picsum.photos/seed/wig4/800/800',
+      'https://picsum.photos/seed/wig4b/800/800'
     ],
     type: WigType.FULL_WIG,
-    length: 'Medium Length',
-    condition: WigCondition.FAIR,
-    color: 'Natural Black',
+    length: 'Long',
+    condition: WigCondition.GOOD,
+    color: 'Natural Brown',
     texture: 'Curly',
-    likes: 8,
+    likes: 56,
     isSold: false,
     createdAt: Date.now() - 86400000
   },
   {
     id: 'w5',
     sellerId: 'user_6',
-    title: 'Bone Straight Extension Clip-ins',
-    description: 'Silky smooth bone straight clip-ins. 10 pieces. 100% Human Hair.',
-    price: 1200,
+    title: 'Signature Ombre Body Wave - 20"',
+    description: 'Beautiful 1B/30 ombre transition. Soft waves that hold their shape. High-quality Remy hair.',
+    price: 10500,
     images: [
-      'https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1533519842415-115f013d2f95?auto=format&fit=crop&w=800&q=80'
+      'https://picsum.photos/seed/wig5/800/800',
+      'https://picsum.photos/seed/wig5b/800/800'
     ],
-    type: WigType.EXTENSION,
-    length: 'Medium Length',
+    type: WigType.FULL_WIG,
+    length: 'Long',
     condition: WigCondition.LIKE_NEW,
-    color: 'Natural Black',
-    texture: 'Straight',
-    likes: 45,
+    color: '1B/30 Ombre',
+    texture: 'Wavy',
+    likes: 89,
     isSold: false,
     createdAt: Date.now() - 400000
   },
   {
     id: 'w6',
     sellerId: 'user_7',
-    title: 'Deep Wave Bob',
-    description: 'Wet and wavy look. Very low maintenance. Comes with wig cap and band.',
-    price: 1500,
+    title: 'Goddess Kinky Straight - 16"',
+    description: 'Mimics natural blown-out hair perfectly. Adds incredible volume and length. Very realistic texture.',
+    price: 9200,
     images: [
-      'https://images.unsplash.com/photo-1562004760-aceed7bb0fe3?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1521119989659-a83eee488058?auto=format&fit=crop&w=800&q=80'
+      'https://picsum.photos/seed/wig6/800/800',
+      'https://picsum.photos/seed/wig6b/800/800'
+    ],
+    type: WigType.FULL_WIG,
+    length: 'Medium Length',
+    condition: WigCondition.GOOD,
+    color: 'Natural Black',
+    texture: 'Straight',
+    likes: 42,
+    isSold: false,
+    createdAt: Date.now() - 900000
+  },
+  {
+    id: 'w7',
+    sellerId: 'user_8',
+    title: 'Platinum Blonde 613 Glamour - 26"',
+    description: 'Stunning 613 blonde hair. Can be dyed any color. Double wefted for extra thickness.',
+    price: 13500,
+    originalPrice: 16000,
+    images: [
+      'https://picsum.photos/seed/wig7/800/800',
+      'https://picsum.photos/seed/wig7b/800/800'
+    ],
+    type: WigType.FULL_WIG,
+    length: 'Long',
+    condition: WigCondition.LIKE_NEW,
+    color: '613 Blonde',
+    texture: 'Straight',
+    likes: 210,
+    isSold: false,
+    createdAt: Date.now() - 1200000
+  },
+  {
+    id: 'w8',
+    sellerId: 'user_9',
+    title: 'Natural Afro Kinky Coils - 14"',
+    description: 'Authentic 4C hair texture. Soft, manageable, and very full. Perfect for a natural afro look.',
+    price: 8800,
+    images: [
+      'https://picsum.photos/seed/wig8/800/800',
+      'https://picsum.photos/seed/wig8b/800/800'
+    ],
+    type: WigType.FULL_WIG,
+    length: 'Medium Length',
+    condition: WigCondition.LIKE_NEW,
+    color: 'Natural Black',
+    texture: 'Curly',
+    likes: 74,
+    isSold: false,
+    createdAt: Date.now() - 3000000
+  },
+  {
+    id: 'w9',
+    sellerId: 'user_10',
+    title: 'Sleek Bone Straight 30" - Extra Long',
+    description: 'For the ultimate glamour look. 30 inches of pure bone straight hair. Requires minimal styling.',
+    price: 15500,
+    images: [
+      'https://picsum.photos/seed/wig9/800/800',
+      'https://picsum.photos/seed/wig9b/800/800'
+    ],
+    type: WigType.FULL_WIG,
+    length: 'Long',
+    condition: WigCondition.LIKE_NEW,
+    color: 'Jet Black',
+    texture: 'Straight',
+    likes: 340,
+    isSold: false,
+    createdAt: Date.now() - 500000
+  },
+  {
+    id: 'w10',
+    sellerId: 'user_11',
+    title: 'Chocolate Brown Highlights - 16" Bob',
+    description: 'Trendy chocolate brown with honey highlights. Pre-cut bob style. Very flattering for all skin tones.',
+    price: 9400,
+    images: [
+      'https://picsum.photos/seed/wig10/800/800',
+      'https://picsum.photos/seed/wig10b/800/800'
     ],
     type: WigType.FULL_WIG,
     length: 'Short',
     condition: WigCondition.GOOD,
-    color: 'Dark Brown',
-    texture: 'Curly',
-    likes: 32,
+    color: 'Chocolate Brown',
+    texture: 'Straight',
+    likes: 62,
     isSold: false,
-    createdAt: Date.now() - 900000
+    createdAt: Date.now() - 2500000
+  },
+  {
+    id: 'w11',
+    sellerId: 'user_12',
+    title: 'Burgundy Red Wine Wave - 22"',
+    description: 'Deep burgundy color that shines in the sun. Soft body waves for a romantic look. Breathable lace cap.',
+    price: 10800,
+    images: [
+      'https://picsum.photos/seed/wig11/800/800',
+      'https://picsum.photos/seed/wig11b/800/800'
+    ],
+    type: WigType.FULL_WIG,
+    length: 'Long',
+    condition: WigCondition.LIKE_NEW,
+    color: 'Burgundy',
+    texture: 'Wavy',
+    likes: 95,
+    isSold: false,
+    createdAt: Date.now() - 1500000
+  },
+  {
+    id: 'w12',
+    sellerId: 'user_13',
+    title: 'Short Pixie Cut Human Hair',
+    description: 'Effortless style with this short pixie cut. 100% human hair, can be heat styled. Very lightweight.',
+    price: 8200,
+    images: [
+      'https://picsum.photos/seed/wig12/800/800',
+      'https://picsum.photos/seed/wig12b/800/800'
+    ],
+    type: WigType.FULL_WIG,
+    length: 'Short',
+    condition: WigCondition.LIKE_NEW,
+    color: 'Natural Black',
+    texture: 'Straight',
+    likes: 38,
+    isSold: false,
+    createdAt: Date.now() - 4500000
+  },
+  {
+    id: 'w13',
+    sellerId: 'user_14',
+    title: 'Glueless Wear & Go Straight - 20"',
+    description: 'The ultimate convenience. No glue needed, just wear and go. Perfect for beginners. Natural hairline.',
+    price: 11500,
+    images: [
+      'https://picsum.photos/seed/wig13/800/800',
+      'https://picsum.photos/seed/wig13b/800/800'
+    ],
+    type: WigType.FULL_WIG,
+    length: 'Long',
+    condition: WigCondition.LIKE_NEW,
+    color: 'Natural Black',
+    texture: 'Straight',
+    likes: 112,
+    isSold: false,
+    createdAt: Date.now() - 6000000
   }
 ];
 
