@@ -1,8 +1,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Wig } from '../types';
+import { Wig, SiteSettings } from '../types';
 import { storeService } from '../services/integration';
-import { ChevronLeft, ChevronRight, ArrowUpDown, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowUpDown, X, Edit2, PlusCircle } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { Logo } from '../components/Logo';
 
@@ -11,17 +11,35 @@ interface HomeProps {
   onInstallApp?: () => void;
   canInstall?: boolean;
   onChangeView?: (view: any, category?: string) => void;
+  isAdminMode?: boolean;
+  setIsAdminMode?: (isAdmin: boolean) => void;
+  adminEmail?: string;
+  siteSettings: SiteSettings;
+  onUpdateSettings: (settings: SiteSettings) => void;
 }
 
 type SortOption = 'newest' | 'price_low' | 'price_high';
 
-export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canInstall, onChangeView }) => {
+export const Home: React.FC<HomeProps> = ({ 
+  onProductClick, 
+  onInstallApp, 
+  canInstall, 
+  onChangeView,
+  isAdminMode,
+  setIsAdminMode,
+  adminEmail,
+  siteSettings,
+  onUpdateSettings
+}) => {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [wigs, setWigs] = useState<Wig[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(true);
+
+  // Check if current user is admin (mock check)
+  const isUserAdmin = adminEmail === 'neveen.heshmat@gmail.com';
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -45,10 +63,10 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (scrollRef.current) {
+      if (scrollRef.current && !isAdminMode) {
         const { current } = scrollRef;
         const slideWidth = current.clientWidth * 0.9; // Match slide width
-        const totalSlides = 4;
+        const totalSlides = siteSettings.heroSlides.length;
         const nextSlide = (currentSlide + 1) % totalSlides;
         
         current.scrollTo({ left: nextSlide * (slideWidth + 16), behavior: 'smooth' }); // 16 is space-x-4
@@ -57,13 +75,13 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
     }, 4000); // Auto-scroll every 4 seconds
 
     return () => clearInterval(interval);
-  }, [currentSlide]);
+  }, [currentSlide, isAdminMode, siteSettings.heroSlides.length]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const { current } = scrollRef;
       const slideWidth = current.clientWidth * 0.9;
-      const totalSlides = 4;
+      const totalSlides = siteSettings.heroSlides.length;
       let nextSlide = direction === 'left' ? currentSlide - 1 : currentSlide + 1;
       
       if (nextSlide < 0) nextSlide = totalSlides - 1;
@@ -74,8 +92,72 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
     }
   };
 
+  const handleEditSlogan = () => {
+    const main = prompt('Enter main slogan:', siteSettings.slogan.main);
+    const sub = prompt('Enter sub slogan:', siteSettings.slogan.sub);
+    if (main !== null && sub !== null) {
+      onUpdateSettings({
+        ...siteSettings,
+        slogan: { main, sub }
+      });
+    }
+  };
+
+  const handleEditSlide = (id: number) => {
+    const slide = siteSettings.heroSlides.find(s => s.id === id);
+    if (!slide) return;
+
+    const title = prompt('Enter slide title:', slide.title);
+    const image = prompt('Enter slide image URL:', slide.image);
+    const tag = prompt('Enter slide tag:', slide.tag);
+    const cta = prompt('Enter slide CTA text:', slide.cta);
+
+    if (title !== null && image !== null && tag !== null && cta !== null) {
+      const newSlides = siteSettings.heroSlides.map(s => 
+        s.id === id ? { ...s, title, image, tag, cta } : s
+      );
+      onUpdateSettings({ ...siteSettings, heroSlides: newSlides });
+    }
+  };
+
+  const handleEditCategory = (id: string) => {
+    const cat = siteSettings.categories.find(c => c.id === id);
+    if (!cat) return;
+
+    const title = prompt('Enter category title:', cat.title);
+    const subtitle = prompt('Enter category subtitle:', cat.subtitle);
+    const image = prompt('Enter category image URL:', cat.image);
+
+    if (title !== null && subtitle !== null && image !== null) {
+      const newCats = siteSettings.categories.map(c => 
+        c.id === id ? { ...c, title, subtitle, image } : c
+      );
+      onUpdateSettings({ ...siteSettings, categories: newCats });
+    }
+  };
+
   return (
     <div className="pb-24 md:pb-12 bg-white min-h-screen font-sans">
+      {/* Admin Toggle */}
+      {isUserAdmin && (
+        <div className="bg-primary-50 px-6 py-2 flex items-center justify-between border-b border-primary-100 sticky top-0 z-[60] backdrop-blur-md">
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-bold text-primary-700 uppercase tracking-wider">Site Editor</span>
+            <div className="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></div>
+          </div>
+          <button 
+            onClick={() => setIsAdminMode?.(!isAdminMode)}
+            className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
+              isAdminMode 
+                ? 'bg-primary-600 text-white shadow-md' 
+                : 'bg-white text-primary-600 border border-primary-200'
+            }`}
+          >
+            {isAdminMode ? 'Exit Editor' : 'Enable Editor'}
+          </button>
+        </div>
+      )}
+
       {/* Header / Logo Section */}
       <header className="pt-8 pb-6 px-6 text-center border-b border-gray-50 bg-white overflow-hidden relative">
         {/* Decorative background - Subtle Grid instead of Dots */}
@@ -83,22 +165,27 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
         
         {/* Mobile Logo */}
         <div className="md:hidden mb-4 relative flex items-center justify-center">
-            <Logo variant="comic" className="scale-125" />
+            <Logo variant="comic" className="scale-125" text={siteSettings.logoText} />
         </div>
         
-        {/* Slogan Update: Bigger, Clear, Catchy, Crowns */}
-        <div className="relative z-10 my-8">
+        {/* Slogan Section */}
+        <div className="relative z-10 my-8 group">
+            {isAdminMode && (
+              <button 
+                onClick={handleEditSlogan}
+                className="absolute -top-10 right-0 p-3 bg-primary-500 text-white rounded-full shadow-2xl z-[100] transition-all hover:scale-110 cursor-pointer pointer-events-auto border-2 border-white"
+                title="Edit Slogan"
+              >
+                <Edit2 size={18} />
+              </button>
+            )}
             <h1 className="font-black text-3xl md:text-5xl text-secondary-900 leading-snug drop-shadow-sm tracking-wide" dir="rtl">
-              <span className="text-primary-500 inline-block transform hover:scale-110 transition-transform duration-300">باروكة</span> تروح 
-              <span className="mx-3 inline-block animate-bounce text-4xl align-middle">👑</span>
-              و <span className="text-primary-500 inline-block transform hover:scale-110 transition-transform duration-300">باروكة</span> تيجى 
-              <span className="mx-3 inline-block animate-bounce text-4xl align-middle" style={{ animationDelay: '0.5s' }}>👑</span>
+              {siteSettings.slogan.main}
+            </h1>
+            <h1 className="text-xl md:text-3xl font-display font-bold text-secondary-400 mt-2 opacity-80">
+              {siteSettings.slogan.sub}
             </h1>
         </div>
-
-        <h1 className="text-xl md:text-3xl font-display font-bold text-secondary-400 mt-2 relative z-10 opacity-80">
-          Find Your Human Hair Crown
-        </h1>
       </header>
 
            <div className="py-6 relative group bg-white">
@@ -117,143 +204,73 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
          </div>
          
          <div ref={scrollRef} className="flex space-x-4 overflow-x-auto px-6 no-scrollbar snap-x scroll-smooth pb-4">
-            
-            {/* Slide 1: Occasion/Buying */}
-            <div 
-              onClick={() => onChangeView?.('SEARCH')}
-              className="snap-center shrink-0 w-[90%] md:w-[45%] lg:w-[30%] relative rounded-2xl overflow-hidden aspect-[21/9] shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
-            >
-              <img 
-                src="/IMG_3586.webp" 
-                alt="Occasion wig" 
-                className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" 
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent p-6 flex flex-col justify-center items-start text-left">
-                <span className="bg-primary-500 text-white text-[10px] font-bold px-2 py-1 rounded w-fit mb-2 shadow-sm">SPECIAL OCCASION</span>
-                <p className="text-white font-bold text-xl md:text-2xl leading-tight drop-shadow-md" dir="rtl">
-                  عندك فرح او مناسبه و نفسك تشترى باروكة؟
-                </p>
-                <div className="mt-3 flex items-center text-white text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30 group-hover:bg-white/40 transition-all">
-                  تصفحي الآن <ChevronRight size={14} className="ml-1" />
+            {siteSettings.heroSlides.map((slide) => (
+              <div 
+                key={slide.id}
+                onClick={() => !isAdminMode && onChangeView?.(slide.view)}
+                className="snap-center shrink-0 w-[90%] md:w-[45%] lg:w-[30%] relative rounded-2xl overflow-hidden aspect-[21/9] shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
+              >
+                <img 
+                  src={slide.image} 
+                  alt={slide.tag} 
+                  className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" 
+                  referrerPolicy="no-referrer"
+                />
+                <div className={`absolute inset-0 p-6 flex flex-col justify-center ${slide.dir === 'rtl' ? 'bg-gradient-to-l items-end text-right' : 'bg-gradient-to-r items-start text-left'} from-black/70 via-black/30 to-transparent`}>
+                  <span className="bg-primary-500 text-white text-[10px] font-bold px-2 py-1 rounded w-fit mb-2 shadow-sm uppercase">{slide.tag}</span>
+                  <p className="text-white font-bold text-xl md:text-2xl leading-tight drop-shadow-md whitespace-pre-line" dir={slide.dir}>
+                    {slide.title}
+                  </p>
+                  <div className="mt-3 flex items-center text-white text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30 group-hover:bg-white/40 transition-all">
+                    {slide.cta} {slide.dir === 'rtl' ? <ChevronLeft size={14} className="mr-1" /> : <ChevronRight size={14} className="ml-1" />}
+                  </div>
                 </div>
+                {isAdminMode && (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditSlide(slide.id);
+                    }}
+                    className="absolute top-4 right-4 p-3 bg-primary-500 text-white rounded-full shadow-2xl z-[100] hover:scale-110 transition-all cursor-pointer pointer-events-auto border-2 border-white"
+                    title="Edit Slide"
+                  >
+                    <Edit2 size={18} />
+                  </button>
+                )}
               </div>
-            </div>
-
-            {/* Slide 2: Hair Health */}
-            <div 
-              onClick={() => onChangeView?.('SEARCH')}
-              className="snap-center shrink-0 w-[90%] md:w-[45%] lg:w-[30%] relative rounded-2xl overflow-hidden aspect-[21/9] shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Healthy hair" 
-                className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" 
-              />
-              <div className="absolute inset-0 bg-gradient-to-l from-black/70 via-black/30 to-transparent p-6 flex flex-col justify-center items-end text-right">
-                <span className="bg-secondary-500 text-white text-[10px] font-bold px-2 py-1 rounded w-fit mb-2 shadow-sm">HAIR CARE</span>
-                <p className="text-white font-bold text-xl md:text-2xl leading-tight drop-shadow-md" dir="rtl">
-                  شعرك هلك من الصبغه و الحراره و نفسك تريحيه ؟
-                </p>
-                <div className="mt-3 flex items-center text-white text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30 group-hover:bg-white/40 transition-all">
-                  اكتشفي الحل <ChevronLeft size={14} className="mr-1" />
-                </div>
-              </div>
-            </div>
-
-            {/* Slide 3: Quality & Look */}
-            <div 
-              onClick={() => onChangeView?.('SEARCH')}
-              className="snap-center shrink-0 w-[90%] md:w-[45%] lg:w-[30%] relative rounded-2xl overflow-hidden aspect-[21/9] shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1560829141-9988019e917d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Human hair quality" 
-                className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" 
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent p-6 flex flex-col justify-center items-start text-left">
-                <span className="bg-primary-500 text-white text-[10px] font-bold px-2 py-1 rounded w-fit mb-2 shadow-sm">PREMIUM QUALITY</span>
-                <p className="text-white font-bold text-lg md:text-xl leading-tight drop-shadow-md">
-                  Only human hair<br/>
-                  Try before you buy<br/>
-                  Get that curly beach look
-                </p>
-                <div className="mt-3 flex items-center text-white text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30 group-hover:bg-white/40 transition-all">
-                  Shop Now <ChevronRight size={14} className="ml-1" />
-                </div>
-              </div>
-            </div>
-
-            {/* Slide 4: Selling */}
-            <div 
-              onClick={() => onChangeView?.('SELL')}
-              className="snap-center shrink-0 w-[90%] md:w-[45%] lg:w-[30%] relative rounded-2xl overflow-hidden aspect-[21/9] shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Sell your wig" 
-                className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" 
-              />
-              <div className="absolute inset-0 bg-gradient-to-l from-black/70 via-black/30 to-transparent p-6 flex flex-col justify-center items-end text-right">
-                <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded w-fit mb-2 shadow-sm">CASH FOR YOUR WIG</span>
-                <p className="text-white font-bold text-xl md:text-2xl leading-tight drop-shadow-md" dir="rtl">
-                  بيعى باروكتك لو مش لايقه عليكى
-                </p>
-                <div className="mt-3 flex items-center text-white text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30 group-hover:bg-white/40 transition-all">
-                  ابدئي البيع <ChevronLeft size={14} className="mr-1" />
-                </div>
-              </div>
-            </div>
-
+            ))}
          </div>
       </div>
 
-      {/* 3 Big Clickable Photos - WOMEN HAIR ONLY */}
+      {/* Categories Section */}
       <div className="px-6 py-4 space-y-6 md:space-y-0 md:grid md:grid-cols-3 md:gap-6">
-
-        {/* Short */}
-        <button 
-          onClick={() => onChangeView?.('SEARCH', 'short')}
-          className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden group shadow-lg transition-all transform hover:scale-[1.02]"
-        >
-          <img src="https://images.unsplash.com/photo-1516914915600-89f7ddec1c1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Short Wig" />
-          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex flex-col items-center justify-center p-4">
-             <h3 className="text-white font-display font-bold text-3xl tracking-wide drop-shadow-md">Short Wigs</h3>
-             <span className="text-white/90 text-sm font-medium mt-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
-               Chic & Bold
-             </span>
+        {siteSettings.categories.map((cat) => (
+          <div 
+            key={cat.id}
+            onClick={() => !isAdminMode && onChangeView?.('SEARCH', cat.id)}
+            className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden group shadow-lg transition-all transform hover:scale-[1.02] cursor-pointer"
+          >
+            <img src={cat.image} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={cat.title} referrerPolicy="no-referrer" />
+            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex flex-col items-center justify-center p-4">
+               <h3 className="text-white font-display font-bold text-3xl tracking-wide drop-shadow-md">{cat.title}</h3>
+               <span className="text-white/90 text-sm font-medium mt-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
+                 {cat.subtitle}
+               </span>
+            </div>
+            {isAdminMode && (
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditCategory(cat.id);
+                }}
+                className="absolute top-4 right-4 p-3 bg-primary-500 text-white rounded-full shadow-2xl z-[100] hover:scale-110 transition-all cursor-pointer pointer-events-auto border-2 border-white"
+                title="Edit Category"
+              >
+                <Edit2 size={18} />
+              </button>
+            )}
           </div>
-        </button>
-
-        {/* Medium */}
-        <button 
-          onClick={() => onChangeView?.('SEARCH', 'medium')}
-          className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden group shadow-lg transition-all transform hover:scale-[1.02]"
-        >
-          <img src="https://images.unsplash.com/photo-1584297141812-0199b7a38f85?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Medium Wig" />
-          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex flex-col items-center justify-center p-4">
-             <h3 className="text-white font-display font-bold text-3xl tracking-wide drop-shadow-md">Medium Length</h3>
-             <span className="text-white/90 text-sm font-medium mt-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
-               Versatile & Classy
-             </span>
-          </div>
-        </button>
-
-        {/* Long */}
-        <button 
-          onClick={() => onChangeView?.('SEARCH', 'long')}
-          className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden group shadow-lg transition-all transform hover:scale-[1.02]"
-        >
-          <img src="https://images.unsplash.com/photo-1519699047748-de8e457a634e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Long Wig" />
-          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex flex-col items-center justify-center p-4">
-             <h3 className="text-white font-display font-bold text-3xl tracking-wide drop-shadow-md">Long Wigs</h3>
-             <span className="text-white/90 text-sm font-medium mt-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
-               Glamorous & Flowy
-             </span>
-          </div>
-        </button>
+        ))}
       </div>
 
       {/* Product Grid */}
@@ -294,7 +311,7 @@ export const Home: React.FC<HomeProps> = ({ onProductClick, onInstallApp, canIns
           /* Product Grid */
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
             {filteredWigs.map(wig => (
-              <ProductCard key={wig.id} wig={wig} onClick={onProductClick} />
+              <ProductCard key={wig.id} wig={wig} onClick={onProductClick} isAdminMode={isAdminMode} />
             ))}
           </div>
         )}

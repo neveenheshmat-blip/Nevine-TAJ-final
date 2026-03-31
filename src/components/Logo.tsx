@@ -5,9 +5,10 @@ import { Crown } from 'lucide-react';
 interface LogoProps {
   className?: string;
   variant?: 'default' | 'comic';
+  text?: string;
 }
 
-export const Logo: React.FC<LogoProps> = ({ className = '', variant = 'default' }) => {
+export const Logo: React.FC<LogoProps> = ({ className = '', variant = 'default', text = 'TAJ' }) => {
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
       <div className="relative">
@@ -22,7 +23,7 @@ export const Logo: React.FC<LogoProps> = ({ className = '', variant = 'default' 
         )}
       </div>
       <span className={`font-comic text-secondary-900 tracking-tight ${variant === 'comic' ? 'text-4xl' : 'text-2xl'}`}>
-        TAJ
+        {text}
       </span>
     </div>
   );

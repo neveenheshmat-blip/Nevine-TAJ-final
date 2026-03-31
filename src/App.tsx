@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { ViewState, Wig } from './types';
-import { MOCK_WIGS } from './constants';
+import { ViewState, Wig, SiteSettings } from './types';
+import { MOCK_WIGS, MOCK_USER, DEFAULT_SITE_SETTINGS } from './constants';
 import { BottomNav } from './components/BottomNav';
 import { Header } from './components/Header';
 import { Home } from './pages/Home';
@@ -14,10 +14,14 @@ import { ProductCard } from './components/ProductCard';
 
 type SortOption = 'newest' | 'price_low' | 'price_high';
 
+const ADMIN_EMAIL = 'neveen.heshmat@gmail.com';
+
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('HOME');
   const [selectedWig, setSelectedWig] = useState<Wig | null>(null);
   const [cart, setCart] = useState<Wig[]>([]);
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
   
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,7 +111,7 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (currentView) {
       case 'HOME':
-        return <Home onProductClick={handleProductClick} onInstallApp={handleInstallClick} canInstall={!!deferredPrompt} onChangeView={navigateTo} />;
+        return <Home onProductClick={handleProductClick} onInstallApp={handleInstallClick} canInstall={!!deferredPrompt} onChangeView={navigateTo} isAdminMode={isAdminMode} setIsAdminMode={setIsAdminMode} adminEmail={ADMIN_EMAIL} siteSettings={siteSettings} onUpdateSettings={setSiteSettings} />;
       case 'SEARCH':
         const searchResults = getSearchResults();
         return (
@@ -168,7 +172,7 @@ const App: React.FC = () => {
                 {searchResults.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 pb-24">
                     {searchResults.map(wig => (
-                       <ProductCard key={wig.id} wig={wig} onClick={handleProductClick} />
+                       <ProductCard key={wig.id} wig={wig} onClick={handleProductClick} isAdminMode={isAdminMode} />
                     ))}
                   </div>
                 ) : (
@@ -183,14 +187,14 @@ const App: React.FC = () => {
       case 'SELL':
         return <Sell onSuccess={() => navigateTo('PROFILE')} />;
       case 'PRODUCT_DETAILS':
-        if (!selectedWig) return <Home onProductClick={handleProductClick} />;
-        return <ProductDetails wig={selectedWig} onBack={() => navigateTo('HOME')} onAddToCart={handleAddToCart} />;
+        if (!selectedWig) return <Home onProductClick={handleProductClick} onInstallApp={handleInstallClick} canInstall={!!deferredPrompt} onChangeView={navigateTo} isAdminMode={isAdminMode} setIsAdminMode={setIsAdminMode} adminEmail={ADMIN_EMAIL} siteSettings={siteSettings} onUpdateSettings={setSiteSettings} />;
+        return <ProductDetails wig={selectedWig} onBack={() => navigateTo('HOME')} onAddToCart={handleAddToCart} currentUser={MOCK_USER} isAdminMode={isAdminMode} />;
       case 'CART':
         return <Cart cart={cart} onRemove={handleRemoveFromCart} onBack={() => navigateTo('HOME')} onCheckout={handleCheckoutSuccess} />;
       case 'PROFILE':
         return <Profile />;
       default:
-        return <Home onProductClick={handleProductClick} />;
+        return <Home onProductClick={handleProductClick} onInstallApp={handleInstallClick} canInstall={!!deferredPrompt} onChangeView={navigateTo} isAdminMode={isAdminMode} setIsAdminMode={setIsAdminMode} adminEmail={ADMIN_EMAIL} siteSettings={siteSettings} onUpdateSettings={setSiteSettings} />;
     }
   };
 
@@ -204,6 +208,9 @@ const App: React.FC = () => {
         cartCount={cart.length} 
         onInstallApp={handleInstallClick}
         canInstall={!!deferredPrompt}
+        isAdminMode={isAdminMode}
+        logoText={siteSettings.logoText}
+        onUpdateLogo={(text) => setSiteSettings({ ...siteSettings, logoText: text })}
       />
       
       <main className="flex-1 w-full max-w-7xl mx-auto shadow-none md:shadow-xl bg-white md:my-6 md:rounded-3xl overflow-hidden min-h-[calc(100vh-100px)]">

@@ -1,13 +1,80 @@
 
-import { Wig, WigCondition, WigType, User } from './types';
+import { Wig, WigCondition, WigType, User, SiteSettings } from './types';
 
 export const COMMISSION_RATE = 0.20;
 export const APP_NAME = "TAJ";
+
+export const DEFAULT_SITE_SETTINGS: SiteSettings = {
+  logoText: 'TAJ',
+  slogan: {
+    main: 'باروكة تروح 👑 و باروكة تيجى 👑',
+    sub: 'Find Your Human Hair Crown'
+  },
+  heroSlides: [
+    {
+      id: 1,
+      title: 'عندك فرح او مناسبه و نفسك تشترى باروكة؟',
+      image: '/IMG_3586.webp',
+      tag: 'SPECIAL OCCASION',
+      cta: 'تصفحي الآن',
+      view: 'SEARCH',
+      dir: 'rtl'
+    },
+    {
+      id: 2,
+      title: 'شعرك هلك من الصبغه و الحراره و نفسك تريحيه ؟',
+      image: 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      tag: 'HAIR CARE',
+      cta: 'اكتشفي الحل',
+      view: 'SEARCH',
+      dir: 'rtl'
+    },
+    {
+      id: 3,
+      title: 'Only human hair\nTry before you buy\nGet that curly beach look',
+      image: 'https://images.unsplash.com/photo-1560829141-9988019e917d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      tag: 'PREMIUM QUALITY',
+      cta: 'Shop Now',
+      view: 'SEARCH',
+      dir: 'ltr'
+    },
+    {
+      id: 4,
+      title: 'بيعى باروكتك لو مش لايقه عليكى',
+      image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      tag: 'CASH FOR YOUR WIG',
+      cta: 'ابدئي البيع',
+      view: 'SELL',
+      dir: 'rtl'
+    }
+  ],
+  categories: [
+    {
+      id: 'short',
+      title: 'Short Wigs',
+      subtitle: 'Chic & Bold',
+      image: 'https://images.unsplash.com/photo-1516914915600-89f7ddec1c1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+    },
+    {
+      id: 'medium',
+      title: 'Medium Length',
+      subtitle: 'Versatile & Classy',
+      image: 'https://images.unsplash.com/photo-1584297141812-0199b7a38f85?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+    },
+    {
+      id: 'long',
+      title: 'Long Wigs',
+      subtitle: 'Glamorous & Flowy',
+      image: 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+    }
+  ]
+};
 
 export const MOCK_USER: User = {
   id: 'user_1',
   name: 'Sarah J.',
   avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+  bio: 'Professional wig stylist and collector. Passionate about high-quality human hair and custom styling.',
   isSeller: true,
   earnings: 1200.50
 };

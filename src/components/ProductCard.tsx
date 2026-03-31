@@ -1,18 +1,21 @@
 
 import React from 'react';
 import { Wig } from '../types';
-import { Heart, ShoppingBag } from 'lucide-react';
+import { Heart, ShoppingBag, Edit2 } from 'lucide-react';
 
 interface ProductCardProps {
   wig: Wig;
   onClick: (wig: Wig) => void;
+  isAdminMode?: boolean;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ wig, onClick }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ wig, onClick, isAdminMode }) => {
   return (
     <div 
       onClick={() => onClick(wig)}
-      className="group bg-white rounded-2xl p-2 pb-4 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer relative"
+      className={`group bg-white rounded-2xl p-2 pb-4 shadow-sm border transition-all duration-300 cursor-pointer relative ${
+        isAdminMode ? 'border-primary-200 ring-1 ring-primary-100' : 'border-gray-100 hover:shadow-xl'
+      }`}
     >
       <div className="aspect-[4/5] bg-gray-100 rounded-xl mb-3 overflow-hidden relative">
         <img 
@@ -21,10 +24,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ wig, onClick }) => {
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute top-2 right-2 z-10">
+        <div className="absolute top-2 right-2 z-10 flex flex-col space-y-2">
           <button className="p-2 bg-white/80 backdrop-blur-md rounded-full text-secondary-400 hover:text-primary-500 transition-colors shadow-sm">
             <Heart size={16} />
           </button>
+          {isAdminMode && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick(wig); // This will open details, where they can edit
+              }}
+              className="p-3 bg-primary-500 text-white rounded-full shadow-2xl hover:bg-primary-600 transition-all z-[100] hover:scale-110 cursor-pointer pointer-events-auto border-2 border-white"
+              title="Edit Product"
+            >
+              <Edit2 size={18} />
+            </button>
+          )}
         </div>
         {wig.originalPrice && (
           <div className="absolute top-2 left-2 z-10">

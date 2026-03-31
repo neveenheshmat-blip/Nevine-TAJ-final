@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ViewState } from '../types';
-import { Search, ShoppingBag, User, PlusCircle, Download } from 'lucide-react';
+import { Search, ShoppingBag, User, PlusCircle, Download, Edit2 } from 'lucide-react';
 import { Logo } from './Logo';
 
 interface HeaderProps {
@@ -10,16 +10,43 @@ interface HeaderProps {
   cartCount: number;
   onInstallApp?: () => void;
   canInstall?: boolean;
+  isAdminMode?: boolean;
+  logoText?: string;
+  onUpdateLogo?: (text: string) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ currentView, onChangeView, cartCount, onInstallApp, canInstall }) => {
+export const Header: React.FC<HeaderProps> = ({ 
+  currentView, 
+  onChangeView, 
+  cartCount, 
+  onInstallApp, 
+  canInstall,
+  isAdminMode,
+  logoText,
+  onUpdateLogo
+}) => {
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-      <div 
-        onClick={() => onChangeView('HOME')}
-        className="cursor-pointer"
-      >
-        <Logo />
+      <div className="flex items-center space-x-4">
+        <div 
+          onClick={() => onChangeView('HOME')}
+          className="cursor-pointer"
+        >
+          <Logo text={logoText} />
+        </div>
+        {isAdminMode && (
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              const newText = prompt('Enter new Logo text:', logoText);
+              if (newText) onUpdateLogo?.(newText);
+            }}
+            className="p-2 bg-primary-50 text-primary-600 rounded-lg hover:bg-primary-100 transition-all z-[100] cursor-pointer pointer-events-auto shadow-sm"
+            title="Edit Logo Text"
+          >
+            <Edit2 size={16} />
+          </button>
+        )}
       </div>
 
       <div className="hidden md:flex items-center space-x-8">

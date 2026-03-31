@@ -27,8 +27,32 @@ export interface User {
   id: string;
   name: string;
   avatar: string;
+  bio?: string;
   isSeller: boolean;
   earnings: number;
+}
+
+export interface SiteSettings {
+  logoText: string;
+  heroSlides: {
+    id: number;
+    title: string;
+    image: string;
+    tag: string;
+    cta: string;
+    view: ViewState;
+    dir?: 'rtl' | 'ltr';
+  }[];
+  categories: {
+    id: string;
+    title: string;
+    subtitle: string;
+    image: string;
+  }[];
+  slogan: {
+    main: string;
+    sub: string;
+  };
 }
 
 export interface Wig {
